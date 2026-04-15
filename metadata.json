@@ -1,0 +1,5 @@
+{
+  "name": "Vayu Edge",
+  "description": "A production-grade CDN platform using Puter.js and Service Worker edge caching.",
+  "requestFramePermissions": []
+}
