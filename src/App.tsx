@@ -49,6 +49,7 @@ import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { format } from 'date-fns';
+import IntroPage from './components/IntroPage';
 
 ChartJS.register(
   CategoryScale,
@@ -519,52 +520,9 @@ export default function App() {
   }
 
   if (!isSignedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-dark relative overflow-hidden">
-        {/* Background Decorative Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
-        </div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card p-12 max-w-md w-full text-center relative z-10"
-        >
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-accent to-indigo-600 flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(79,140,255,0.4)]">
-            <Zap className="text-white fill-white" size={40} />
-          </div>
-          <h2 className="text-3xl font-black tracking-tighter mb-4 uppercase">Vayu Edge</h2>
-          <p className="text-white/40 mb-8 text-sm leading-relaxed">
-            The world's most advanced Edge CDN platform. 
-            Sign in with your Vayu account to manage your global assets, DNS, and security.
-          </p>
-          <button 
-            onClick={handleSignIn}
-            className="w-full glass-button glass-button-primary py-4 font-bold text-base flex items-center justify-center gap-3 group"
-          >
-            Connect to Vayu Cloud
-            <ExternalLink size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-          </button>
-          <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-center gap-6">
-            <div className="flex flex-col items-center">
-              <Globe size={16} className="text-white/20 mb-1" />
-              <span className="text-[10px] uppercase tracking-widest text-white/20">Global PoPs</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <Shield size={16} className="text-white/20 mb-1" />
-              <span className="text-[10px] uppercase tracking-widest text-white/20">Edge Security</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <Zap size={16} className="text-white/20 mb-1" />
-              <span className="text-[10px] uppercase tracking-widest text-white/20">14ms Latency</span>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    );
+    return <IntroPage onSignIn={handleSignIn} />;
   }
+
 
   return (
     <div className="flex h-screen overflow-hidden bg-bg-dark selection:bg-accent/30 text-white relative">
