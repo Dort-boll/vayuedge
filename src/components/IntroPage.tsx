@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Declare globals for libraries loaded via CDN in index.html
 declare global {
@@ -18,6 +18,18 @@ export default function IntroPage({ onSignIn }: IntroPageProps) {
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const heroCanvasRef = useRef<HTMLCanvasElement>(null);
   const networkCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     // --------------------------------------------------
@@ -223,7 +235,6 @@ export default function IntroPage({ onSignIn }: IntroPageProps) {
         left: 0;
         right: 0;
         z-index: 50;
-        overflow: hidden;
       }
       
       /* Beveled glass mirror edge effect */
@@ -246,33 +257,8 @@ export default function IntroPage({ onSignIn }: IntroPageProps) {
         pointer-events: none;
       }
 
-      /* Premium Mirror Diagonal Sheen Effect */
-      .header-glass .mirror-sheen {
-        position: absolute;
-        top: 0;
-        left: -150%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(255, 255, 255, 0) 10%,
-          rgba(255, 255, 255, 0.15) 30%,
-          rgba(255, 255, 255, 0.25) 50%,
-          rgba(255, 255, 255, 0.15) 70%,
-          rgba(255, 255, 255, 0) 90%,
-          transparent
-        );
-        transform: skewX(-30deg);
-        pointer-events: none;
-        z-index: 1;
-        animation: mirrorSwipe 8s ease-in-out infinite;
-      }
-
-      @keyframes mirrorSwipe {
-        0% { left: -150%; }
-        15% { left: 150%; }
-        100% { left: 150%; }
+      .header-inner {
+        position: relative;
       }
 
       .header-glass.scrolled {
@@ -281,6 +267,33 @@ export default function IntroPage({ onSignIn }: IntroPageProps) {
         -webkit-backdrop-filter: blur(35px) saturate(200%) !important;
         border-bottom-color: rgba(94, 235, 255, 0.25) !important;
         box-shadow: 0 10px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      .menu-glass {
+        background: rgba(4, 7, 16, 0.72) !important;
+        backdrop-filter: blur(32px) saturate(210%) !important;
+        -webkit-backdrop-filter: blur(32px) saturate(210%) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+        box-shadow: 
+          0 30px 70px -10px rgba(0, 0, 0, 0.95), 
+          inset 0 1px 0 rgba(255, 255, 255, 0.12),
+          0 10px 30px -5px rgba(6, 182, 212, 0.1);
+      }
+
+      @keyframes slideInMenu {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-menu-item {
+        animation: slideInMenu 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
 
       .btn-primary-space {
@@ -1278,10 +1291,9 @@ export default function IntroPage({ onSignIn }: IntroPageProps) {
 
       {/* HEADER */}
       <header id="main-header" className="header-glass fixed top-0 left-0 right-0 z-50">
-        <div className="mirror-sheen" aria-hidden="true"></div>
-        <div className="header-inner max-w-7xl mx-auto px-6 h-16 flex items-center justify-between transition-all duration-500">
+        <div className="header-inner max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between transition-all duration-500">
           <a href="#" className="flex items-center gap-2.5 group" aria-label="Vayu Edge Home">
-            <div className="relative w-8 h-8">
+            <div className="relative w-8 h-8 flex-shrink-0">
               <svg viewBox="0 0 32 32" fill="none" className="w-full h-full">
                 <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" stroke="url(#lg)" strokeWidth={1.5} fill="none"/>
                 <path d="M16 8L22 11.5V18.5L16 22L10 18.5V11.5L16 8Z" fill="url(#lg)" opacity=".25"/>
@@ -1295,23 +1307,144 @@ export default function IntroPage({ onSignIn }: IntroPageProps) {
               </svg>
               <div className="absolute inset-0 rounded-full bg-cyan-400/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>
-            <span className="text-lg font-bold tracking-tight">Vayu <span className="text-cyan-400">Edge</span></span>
+            <span className="text-lg font-bold tracking-tight select-none">Vayu <span className="text-cyan-400">Edge</span></span>
           </a>
           <nav className="hidden lg:flex items-center gap-6" aria-label="Main navigation">
-            <div className="relative group">
-              <button className="nav-link-space flex items-center gap-1">Platform</button>
-            </div>
+            <span className="nav-link-space cursor-pointer">Platform</span>
             <a href="#edge" className="nav-link-space">Compute</a>
             <a href="#ai" className="nav-link-space">AI Cloud</a>
             <a href="#storage" className="nav-link-space">Storage</a>
             <a href="#networking" className="nav-link-space">Networking</a>
             <a href="#pricing" className="nav-link-space">Pricing</a>
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             <button onClick={onSignIn} className="nav-link-space inline mr-2 font-bold hover:text-white">Login</button>
             <button onClick={onSignIn} className="btn-primary-space px-5 py-2 text-sm flex items-center justify-center">
               <span>Start Free</span>
             </button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+            className="flex lg:hidden flex-col justify-center items-center w-10 h-10 gap-1.5 focus:outline-none z-50 relative rounded-lg hover:bg-white/5 active:bg-white/10 transition-colors"
+            aria-label="Toggle Menu"
+          >
+            <span className={`w-6 h-0.5 bg-white transition-all duration-300 rounded ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+            <span className={`w-6 h-0.5 bg-white transition-all duration-300 rounded ${mobileMenuOpen ? 'opacity-0' : ''}`}></span>
+            <span className={`w-6 h-0.5 bg-white transition-all duration-300 rounded ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+          </button>
+        </div>
+
+        {/* Full-screen Blur Glass Backdrop Overlay */}
+        <div 
+          className={`fixed inset-0 top-16 bg-slate-950/60 backdrop-blur-2xl lg:hidden z-30 transition-all duration-500 ease-in-out ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+          onClick={() => setMobileMenuOpen(false)}
+        />
+
+        {/* Mobile Navigation Drawer */}
+        <div className={`absolute inset-x-0 top-16 menu-glass overflow-hidden transition-all duration-500 ease-in-out lg:hidden z-40 ${mobileMenuOpen ? 'max-h-[calc(100vh-4rem)] opacity-100 translate-y-0 py-6' : 'max-h-0 opacity-0 -translate-y-2 py-0 pointer-events-none'}`}>
+          <div className="px-5 sm:px-8 flex flex-col gap-4 text-left">
+            <div 
+              className={`text-[10px] font-mono text-gray-500 px-3 pb-2 uppercase tracking-[.25em] border-b border-white/5 flex items-center gap-2 ${mobileMenuOpen ? 'animate-menu-item' : 'opacity-0'}`}
+              style={{ animationDelay: '60ms' }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+              Platform Hub
+            </div>
+            
+            <a 
+              href="#edge" 
+              onClick={() => setMobileMenuOpen(false)} 
+              className={`group flex items-center justify-between text-gray-300 hover:text-cyan-400 text-[15px] font-medium py-2.5 px-3 rounded-xl hover:bg-white/[0.03] active:bg-white/[0.06] border border-transparent hover:border-white/[0.05] transition-all duration-200 ${mobileMenuOpen ? 'animate-menu-item' : 'opacity-0'}`}
+              style={{ animationDelay: '120ms' }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+                <span>Compute</span>
+              </div>
+              <svg className="w-4 h-4 text-gray-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+
+            <a 
+              href="#ai" 
+              onClick={() => setMobileMenuOpen(false)} 
+              className={`group flex items-center justify-between text-gray-300 hover:text-cyan-400 text-[15px] font-medium py-2.5 px-3 rounded-xl hover:bg-white/[0.03] active:bg-white/[0.06] border border-transparent hover:border-white/[0.05] transition-all duration-200 ${mobileMenuOpen ? 'animate-menu-item' : 'opacity-0'}`}
+              style={{ animationDelay: '180ms' }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+                <span>AI Cloud</span>
+              </div>
+              <svg className="w-4 h-4 text-gray-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+
+            <a 
+              href="#storage" 
+              onClick={() => setMobileMenuOpen(false)} 
+              className={`group flex items-center justify-between text-gray-300 hover:text-cyan-400 text-[15px] font-medium py-2.5 px-3 rounded-xl hover:bg-white/[0.03] active:bg-white/[0.06] border border-transparent hover:border-white/[0.05] transition-all duration-200 ${mobileMenuOpen ? 'animate-menu-item' : 'opacity-0'}`}
+              style={{ animationDelay: '240ms' }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+                <span>Storage</span>
+              </div>
+              <svg className="w-4 h-4 text-gray-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+
+            <a 
+              href="#networking" 
+              onClick={() => setMobileMenuOpen(false)} 
+              className={`group flex items-center justify-between text-gray-300 hover:text-cyan-400 text-[15px] font-medium py-2.5 px-3 rounded-xl hover:bg-white/[0.03] active:bg-white/[0.06] border border-transparent hover:border-white/[0.05] transition-all duration-200 ${mobileMenuOpen ? 'animate-menu-item' : 'opacity-0'}`}
+              style={{ animationDelay: '300ms' }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+                <span>Networking</span>
+              </div>
+              <svg className="w-4 h-4 text-gray-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+
+            <a 
+              href="#pricing" 
+              onClick={() => setMobileMenuOpen(false)} 
+              className={`group flex items-center justify-between text-gray-300 hover:text-cyan-400 text-[15px] font-medium py-2.5 px-3 rounded-xl hover:bg-white/[0.03] active:bg-white/[0.06] border border-transparent hover:border-white/[0.05] transition-all duration-200 ${mobileMenuOpen ? 'animate-menu-item' : 'opacity-0'}`}
+              style={{ animationDelay: '360ms' }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+                <span>Pricing</span>
+              </div>
+              <svg className="w-4 h-4 text-gray-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+            
+            <div 
+              className={`border-t border-white/5 pt-5 mt-2 px-3 flex flex-col gap-3 ${mobileMenuOpen ? 'animate-menu-item' : 'opacity-0'}`}
+              style={{ animationDelay: '420ms' }}
+            >
+              <button 
+                onClick={() => { setMobileMenuOpen(false); onSignIn(); }} 
+                className="w-full py-3 text-center text-gray-300 hover:text-white border border-white/10 rounded-xl bg-white/[0.02] hover:bg-white/5 active:bg-white/10 font-bold tracking-tight text-sm transition-all duration-200 shadow-md"
+              >
+                Login to Portal
+              </button>
+              <button 
+                onClick={() => { setMobileMenuOpen(false); onSignIn(); }} 
+                className="btn-primary-space w-full py-3.5 text-center font-bold text-sm tracking-tight transition-all duration-200 shadow-lg shadow-cyan-500/10 active:scale-[0.98]"
+              >
+                Start Free Trial
+              </button>
+            </div>
           </div>
         </div>
       </header>
