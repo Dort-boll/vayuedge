@@ -133,7 +133,8 @@ export default function App() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [cachedUrls, setCachedUrls] = useState<string[]>([]);
   const [isSimulating, setIsSimulating] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 1024);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(typeof window !== 'undefined' ? window.innerWidth > 1024 : true);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [cdnDomain, setCdnDomain] = useState<string>('');
@@ -320,7 +321,9 @@ export default function App() {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth > 1024) {
+      const width = window.innerWidth;
+      setWindowWidth(width);
+      if (width > 1024) {
         setIsSidebarOpen(true);
         setIsMobileMenuOpen(false);
       } else {
@@ -485,30 +488,37 @@ export default function App() {
 
   // --- Render Helpers ---
 
-  const SidebarItem = ({ id, icon: Icon, label }: { id: typeof activeTab, icon: any, label: string }) => (
-    <button
-      onClick={() => {
-        setActiveTab(id);
-        if (window.innerWidth < 1024) setIsMobileMenuOpen(false);
-      }}
-      className={cn(
-        "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden",
-        activeTab === id 
-          ? "bg-accent text-white shadow-[0_0_20px_rgba(79,140,255,0.3)]" 
-          : "text-white/50 hover:text-white hover:bg-white/5"
-      )}
-    >
-      {activeTab === id && (
-        <motion.div 
-          layoutId="active-pill"
-          className="absolute inset-0 bg-gradient-to-r from-accent to-indigo-600 -z-10"
-          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-        />
-      )}
-      <Icon size={20} className={cn("transition-transform duration-300", activeTab === id ? "scale-110" : "group-hover:scale-110")} />
-      <span className={cn("font-medium transition-opacity duration-300", (!isSidebarOpen && window.innerWidth > 1024) && "lg:opacity-0 lg:pointer-events-none")}>{label}</span>
-    </button>
-  );
+  const SidebarItem = ({ id, icon: Icon, label }: { id: typeof activeTab, icon: any, label: string }) => {
+    const isCollapsed = !isSidebarOpen && windowWidth > 1024;
+    return (
+      <button
+        onClick={() => {
+          setActiveTab(id);
+          if (windowWidth < 1024) setIsMobileMenuOpen(false);
+        }}
+        className={cn(
+          "w-full flex items-center rounded-xl transition-all duration-300 group relative overflow-hidden py-3",
+          isCollapsed ? "justify-center px-0" : "justify-start px-4 gap-3",
+          activeTab === id 
+            ? "bg-accent text-white shadow-[0_0_20px_rgba(79,140,255,0.3)]" 
+            : "text-white/50 hover:text-white hover:bg-white/5"
+        )}
+        title={isCollapsed ? label : undefined}
+      >
+        {activeTab === id && (
+          <motion.div 
+            layoutId="active-pill"
+            className="absolute inset-0 bg-gradient-to-r from-accent to-indigo-600 -z-10"
+            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+          />
+        )}
+        <Icon size={20} className={cn("flex-shrink-0 transition-transform duration-300", activeTab === id ? "scale-110" : "group-hover:scale-110")} />
+        {!isCollapsed && (
+          <span className="font-medium whitespace-nowrap">{label}</span>
+        )}
+      </button>
+    );
+  };
 
   if (!isLoaded) {
     return (
@@ -549,16 +559,16 @@ export default function App() {
       <motion.aside
         initial={false}
         animate={{ 
-          width: window.innerWidth > 1024 ? (isSidebarOpen ? 260 : 80) : 260,
-          x: window.innerWidth > 1024 ? 0 : (isMobileMenuOpen ? 0 : -260)
+          width: windowWidth > 1024 ? (isSidebarOpen ? 260 : 80) : 260,
+          x: windowWidth > 1024 ? 0 : (isMobileMenuOpen ? 0 : -260)
         }}
         className="fixed lg:relative z-50 flex flex-col h-full border-r border-white/5 bg-bg-dark/80 backdrop-blur-2xl transition-all duration-300 ease-in-out"
       >
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-indigo-600 flex items-center justify-center shadow-[0_0_20px_rgba(79,140,255,0.4)]">
+        <div className={cn("p-6 flex items-center", (!isSidebarOpen && windowWidth > 1024) ? "justify-center" : "gap-3")}>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-indigo-600 flex items-center justify-center shadow-[0_0_20px_rgba(79,140,255,0.4)] flex-shrink-0">
             <Zap className="text-white fill-white" size={24} />
           </div>
-          {(isSidebarOpen || window.innerWidth <= 1024) && (
+          {(isSidebarOpen || windowWidth <= 1024) && (
             <span className="text-xl font-bold tracking-tighter bg-gradient-to-r from-white via-white to-white/40 bg-clip-text text-transparent">
               VAYU EDGE
             </span>
@@ -581,10 +591,16 @@ export default function App() {
         <div className="p-4 border-t border-white/5 space-y-2">
           <button 
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-red-500 hover:bg-red-500/5 transition-all duration-300 group"
+            className={cn(
+              "w-full flex items-center rounded-xl text-red-400 hover:text-red-500 hover:bg-red-500/5 transition-all duration-300 group py-3",
+              (!isSidebarOpen && windowWidth > 1024) ? "justify-center px-0" : "justify-start px-4 gap-3"
+            )}
+            title={(!isSidebarOpen && windowWidth > 1024) ? "Sign Out" : undefined}
           >
-            <LogOut size={20} className="group-hover:scale-110 transition-transform" />
-            <span className={cn("font-medium transition-opacity duration-300", (!isSidebarOpen && window.innerWidth > 1024) && "lg:opacity-0 lg:pointer-events-none")}>Sign Out</span>
+            <LogOut size={20} className="flex-shrink-0 group-hover:scale-110 transition-transform" />
+            {(isSidebarOpen || windowWidth <= 1024) && (
+              <span className="font-medium">Sign Out</span>
+            )}
           </button>
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
